@@ -26,7 +26,7 @@ fmt.fmt("Number %d, float %f, string %s", with: [fmt.D(99), fmt.F(12.9), fmt.S("
 |> should.equal("Number 99, float 12.9, string Hello!")
 ```
 
-Further documentation can be found at <https://hexdocs.pm/fmtglee>.
+Further documentation can be found at <https://hexdocs.pm/fmglee>.
 
 ## Development
 
