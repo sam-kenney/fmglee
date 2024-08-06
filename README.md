@@ -1,7 +1,7 @@
 # FMglee
 
-[![Package Version](https://img.shields.io/hexpm/v/fmt)](https://hex.pm/packages/fmt)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/fmt/)
+[![Package Version](https://img.shields.io/hexpm/v/fmglee)](https://hex.pm/packages/fmglee)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/fmglee/)
 
 FMGlee is a simple string formatting library. It exposes two main APIs to format 
 strings, one driven by pipes, and the other more inline.
