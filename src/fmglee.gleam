@@ -9,14 +9,14 @@
 ////
 //// Examples
 //// ```gleam
-//// import fmglee as fmt
+//// import fmglee
 //// import gleeunit/should
 //// 
-//// fmt.new("Number %d, float %f, string %s")
-//// |> fmt.d(99)
-//// |> fmt.f(12.9)
-//// |> fmt.s("Hello!")
-//// |> fmt.build
+//// fmglee.new("Number %d, float %f, string %s")
+//// |> fmglee.d(99)
+//// |> fmglee.f(12.9)
+//// |> fmglee.s("Hello!")
+//// |> fmglee.build
 //// |> should.equal("Number 99, float 12.9, string Hello!")
 //// ```
 //// ```gleam
@@ -133,9 +133,9 @@ pub fn try_fmt(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
 /// type.
 fn fmt_iter(str: String, with values: List(Fmt)) -> Result(String, FmtError) {
   case values {
-    [S(value), ..] -> process_fmt("%s", value, str, values)
-    [D(value), ..] -> process_fmt("%d", int.to_string(value), str, values)
-    [F(value), ..] -> process_fmt("%f", float.to_string(value), str, values)
+    [S(value), ..rest] -> process_fmt("%s", value, str, rest)
+    [D(value), ..rest] -> process_fmt("%d", int.to_string(value), str, rest)
+    [F(value), ..rest] -> process_fmt("%f", float.to_string(value), str, rest)
     [] -> Ok(str)
   }
 }
@@ -148,10 +148,10 @@ fn process_fmt(
   placeholder: String,
   value: String,
   str: String,
-  values: List(Fmt),
+  remaining values: List(Fmt),
 ) -> Result(String, FmtError) {
   case string.split_once(str, on: placeholder) {
-    Ok(#(first, last)) -> fmt_iter(first <> value <> last, list.drop(values, 1))
+    Ok(#(first, last)) -> fmt_iter(first <> value <> last, values)
     Error(_) -> Error(IncorrectValueType)
   }
 }
@@ -171,17 +171,17 @@ pub fn new(s: String) -> Formatter {
 
 /// Add a `String` value to a `Formatter`.
 pub fn s(formatter: Formatter, s: String) -> Formatter {
-  Formatter(formatter.s, list.append(formatter.v, [S(s)]))
+  Formatter(formatter.s, [S(s), ..formatter.v])
 }
 
 /// Add an `Int` value to a `Formatter`.
 pub fn d(formatter: Formatter, d: Int) -> Formatter {
-  Formatter(formatter.s, list.append(formatter.v, [D(d)]))
+  Formatter(formatter.s, [D(d), ..formatter.v])
 }
 
 /// Add a `Float` value to a `Formatter`.
 pub fn f(formatter: Formatter, f: Float) -> Formatter {
-  Formatter(formatter.s, list.append(formatter.v, [F(f)]))
+  Formatter(formatter.s, [F(f), ..formatter.v])
 }
 
 /// Compile a `Formatter` into a string. Errors when the
@@ -189,7 +189,7 @@ pub fn f(formatter: Formatter, f: Float) -> Formatter {
 /// of placeholders, or if an invalid type was provided
 /// for a placeholder.
 pub fn try_build(formatter: Formatter) -> Result(String, FmtError) {
-  try_fmt(formatter.s, with: formatter.v)
+  try_fmt(formatter.s, with: list.reverse(formatter.v))
 }
 
 /// Compile a Formatter into a string. Panics where 

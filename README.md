@@ -10,19 +10,19 @@ strings, one driven by pipes, and the other more inline.
 gleam add fmglee
 ```
 ```gleam
-import fmglee as fmt
+import fmglee
 import gleeunit/should
 
-fmt.new("Number %d, float %f, string %s")
-|> fmt.d(99)
-|> fmt.f(12.9)
-|> fmt.s("Hello!")
-|> fmt.build
+fmglee.new("Number %d, float %f, string %s")
+|> fmglee.d(99)
+|> fmglee.f(12.9)
+|> fmglee.s("Hello!")
+|> fmglee.build
 |> should.equal("Number 99, float 12.9, string Hello!")
 
 // OR
 
-fmt.fmt("Number %d, float %f, string %s", with: [fmt.D(99), fmt.F(12.9), fmt.S("Hello!")])
+fmglee.fmt("Number %d, float %f, string %s", with: [fmglee.D(99), fmglee.F(12.9), fmglee.S("Hello!")])
 |> should.equal("Number 99, float 12.9, string Hello!")
 ```
 
