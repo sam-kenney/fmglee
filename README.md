@@ -26,6 +26,12 @@ fmglee.fmt("Number %d, float %f, string %s", with: [fmglee.D(99), fmglee.F(12.9)
 |> should.equal("Number 99, float 12.9, string Hello!")
 ```
 
+Float numbers can be rounded, and delimited using the following specifier options (examples use this input 1234.5678).
+- "%.2f" -> Rounds the float to two decimal places - "1234.56"
+- "%.0f" -> Rounds the float to zero decimal places - "1234"
+- "%,f" -> Formats large floats with a comma delimiter - "1,234.5678"
+- "%-.2f" -> Formats the float with a hyphen delimiter and rounds to two decimal places - "1-234.56"
+
 Further documentation can be found at <https://hexdocs.pm/fmglee>.
 
 ## Development
