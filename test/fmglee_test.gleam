@@ -69,8 +69,9 @@ pub fn try_sprintf_ok_test() {
 }
 
 pub fn write_test() {
-  fn(s: String) { should.equal(s, "John is 42 years old") }
+  fn(s: String) { s }
   |> fmglee.write("%s is %d years old", [fmglee.S("John"), fmglee.D(42)], _)
+  |> should.equal("John is 42 years old")
 }
 
 pub fn try_fmt_float_decimal_test() {

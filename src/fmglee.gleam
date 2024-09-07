@@ -36,8 +36,8 @@ import gleam/regex
 import gleam/result
 import gleam/string
 
-type Writer =
-  fn(String) -> Nil
+type Writer(a) =
+  fn(String) -> a
 
 /// Errors returned by fmtglee
 pub type FmtError {
@@ -103,12 +103,12 @@ pub fn printlnf(formatter: Formatter) {
 /// Write a `Formatter` to the provided writer. The `Formatter`
 /// will be built using `build` which will panic if the
 /// formatter is invalid.
-pub fn writef(formatter: Formatter, using writer: Writer) {
+pub fn writef(formatter: Formatter, using writer: Writer(a)) -> a {
   write(formatter.s, formatter.v, writer)
 }
 
 /// Write a string and list of `Fmt` to the provided `Writer`.
-pub fn write(s: String, with v: List(Fmt), using writer: Writer) {
+pub fn write(s: String, with v: List(Fmt), using writer: Writer(a)) -> a {
   let assert Ok(str) = try_sprintf(s, v)
   writer(str)
 }
