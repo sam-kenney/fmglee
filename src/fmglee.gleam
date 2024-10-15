@@ -68,7 +68,7 @@ pub type Fmt {
   F(Float)
 }
 
-pub type Formatter {
+pub opaque type Formatter {
   /// Used to compile a format string using the pipeable methods.
   Formatter(s: String, v: List(Fmt))
 }
@@ -101,21 +101,39 @@ pub fn printlnf(formatter: Formatter) {
 }
 
 /// Write a `Formatter` to the provided writer. The `Formatter`
-/// will be built using `build` which will panic if the
+/// will be built using `sprintf` which will panic if the
 /// formatter is invalid.
 pub fn writef(formatter: Formatter, using writer: Writer(a)) -> a {
   write(formatter.s, formatter.v, writer)
 }
 
-/// Write a string and list of `Fmt` to the provided `Writer`.
-pub fn write(s: String, with v: List(Fmt), using writer: Writer(a)) -> a {
-  let assert Ok(str) = try_sprintf(s, v)
-  writer(str)
+/// Writer a `Formatter` to the provided writer. The `Formatter`
+/// will be built using `try_sprintf` which will error if the
+/// formatter is invalid.
+pub fn try_writef(
+  formatter: Formatter,
+  using writer: Writer(a),
+) -> Result(a, FmtError) {
+  use s <- result.try(try_sprintf(formatter.s, formatter.v))
+  Ok(writer(s))
 }
 
-@deprecated("Use sprintf instead")
-pub fn fmt(s: String, using v: List(Fmt)) -> String {
+/// Write a string and list of `Fmt` to the provided `Writer`.
+pub fn write(s: String, with v: List(Fmt), using writer: Writer(a)) -> a {
   sprintf(s, v)
+  |> writer
+}
+
+/// Write a string and a list of `Fmt` to the provided `Writer`.
+/// Errors when the format string is incompatible with the provided
+/// `Fmt` values.
+pub fn try_write(
+  s: String,
+  with v: List(Fmt),
+  using writer: Writer(a),
+) -> Result(a, FmtError) {
+  use s <- result.try(try_sprintf(s, v))
+  Ok(writer(s))
 }
 
 /// Format a string and a list of `Fmt` values.
@@ -126,14 +144,9 @@ pub fn sprintf(s: String, with v: List(Fmt)) -> String {
   str
 }
 
-@deprecated("Use try_sprintf instead")
-pub fn try_fmt(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
-  try_sprintf(s, v)
-}
-
 /// Format a string and a list of `Fmt` values. Substitutes
 /// placeholders from left to right with values in the
-/// list of Fmt. Errors if there is a type missmatch between
+/// list of Fmt. Errors if there is a type mismatch between
 /// the placeholder and the value, or if the number of placeholders
 /// does not match the number of values given.
 pub fn try_sprintf(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
