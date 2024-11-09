@@ -291,28 +291,39 @@ fn format_delimited_float(
 }
 
 fn float_to_string(value: Float) -> String {
-  // On erlang, small floats are converted to a string with scientific 
-  // notation. This handles small floats and assumes the largest float
-  // decimal point specifier is %.9f (what it currently is at the time of 
-  // writing). If allowing for a higher number of decimal places added later, 
-  // this will need to be updated.
-  case value <. 0.001 {
-    True ->
+  case value {
+    // On erlang, small floats are converted to a string with scientific 
+    // notation. These first two cases handle small floats. It assumes the 
+    // largest float decimal point specifier is %.9f (what it currently is at 
+    // the time of writing). If allowing for a higher number of decimal 
+    // places is added later, this will need to be updated.
+    value if value <. 0.001 && value >=. 0.0 ->
       "0."
       <> {
         float.truncate(value *. 1_000_000_000.0)
         |> int.to_string
         |> string.pad_left(9, "0")
       }
-    False -> {
-      // On erlang, large floats with trailing zeros are converted to a string
-      // with scientific notation. This handles large floats with trailing zeros.
+    value if value >. -0.001 && value <. 0.0 ->
+      "-0."
+      <> {
+        float.truncate(value *. -1_000_000_000.0)
+        |> int.to_string
+        |> string.pad_left(9, "0")
+      }
+
+    // On erlang, large floats with trailing zeros are converted to a string
+    // with scientific notation. This handles large or negative floats
+    // with trailing zeros.
+    value if value >. 1000.0 || value <. -1000.0 -> {
       let trunc = float.truncate(value)
       case value == trunc |> int.to_float {
         True -> trunc |> int.to_string <> ".0"
         False -> float.to_string(value)
       }
     }
+
+    value -> float.to_string(value)
   }
 }
 
