@@ -150,7 +150,7 @@ pub fn sprintf(s: String, with v: List(Fmt)) -> String {
 /// the placeholder and the value, or if the number of placeholders
 /// does not match the number of values given.
 pub fn try_sprintf(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
-  let assert Ok(re) = regex.from_string("(\\%d|\\%s|\\%[\\W]?f|%[\\W]?\\.\\df)")
+  let assert Ok(re) = regex.from_string("(%d|%s|%[\\W]?f|%[\\W]?\\.\\df)")
   let matches =
     regex.scan(re, s)
     |> list.map(fn(m) { m.content })
