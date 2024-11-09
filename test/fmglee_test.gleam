@@ -108,3 +108,24 @@ pub fn try_fmt_float_round_no_remainder_test() {
   |> fmglee.try_build
   |> should.equal(Ok("1234"))
 }
+
+pub fn try_fmt_float_really_small_test() {
+  fmglee.new("%.9f")
+  |> fmglee.f(0.000001415926)
+  |> fmglee.try_build
+  |> should.equal(Ok("0.000001415"))
+}
+
+pub fn try_fmt_float_really_large_test() {
+  fmglee.new("%f")
+  |> fmglee.f(140_000_000.2)
+  |> fmglee.try_build
+  |> should.equal(Ok("140000000.2"))
+}
+
+pub fn try_fmt_float_trailing_test() {
+  fmglee.new("%f")
+  |> fmglee.f(140_000_000.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("140000000.0"))
+}

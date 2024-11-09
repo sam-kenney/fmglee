@@ -208,13 +208,13 @@ fn process_float_fmt(
     }
     ["%", ".", n, "f"] -> {
       use val <- result.try(
-        float.to_string(value)
+        float_to_string(value)
         |> round_float(n),
       )
       process_fmt(placeholder, val, str, values, matches)
     }
     ["%", "f"] ->
-      process_fmt("%f", float.to_string(value), str, values, matches)
+      process_fmt("%f", float_to_string(value), str, values, matches)
     _ -> Error(InvalidFloatFormatSpecifier(placeholder))
   }
 }
@@ -263,7 +263,7 @@ fn format_delimited_float(
   value: Float,
   delimiter: String,
 ) -> Result(String, FmtError) {
-  let val = float.to_string(value)
+  let val = float_to_string(value)
   case string.split(val, on: ".") {
     [num, remainder] -> {
       let intersparced =
@@ -286,7 +286,33 @@ fn format_delimited_float(
         |> string.join("")
       Ok(s <> "." <> remainder)
     }
-    _ -> Error(InvalidFloat(float.to_string(value)))
+    _ -> Error(InvalidFloat(float_to_string(value)))
+  }
+}
+
+fn float_to_string(value: Float) -> String {
+  // On erlang, small floats are converted to a string with scientific 
+  // notation. This handles small floats and assumes the largest float
+  // decimal point specifier is %.9f (what it currently is at the time of 
+  // writing). If allowing for a higher number of decimal places added later, 
+  // this will need to be updated.
+  case value <. 0.001 {
+    True ->
+      "0."
+      <> {
+        float.truncate(value *. 1_000_000_000.0)
+        |> int.to_string
+        |> string.pad_left(9, "0")
+      }
+    False -> {
+      // On erlang, large floats with trailing zeros are converted to a string
+      // with scientific notation. This handles large floats with trailing zeros.
+      let trunc = float.truncate(value)
+      case value == trunc |> int.to_float {
+        True -> trunc |> int.to_string <> ".0"
+        False -> float.to_string(value)
+      }
+    }
   }
 }
 
