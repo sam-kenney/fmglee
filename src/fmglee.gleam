@@ -133,7 +133,7 @@ pub fn try_fmt(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
 
 /// Format a string and a list of `Fmt` values. Substitutes
 /// placeholders from left to right with values in the
-/// list of Fmt. Errors if there is a type missmatch between
+/// list of Fmt. Errors if there is a type mismatch between
 /// the placeholder and the value, or if the number of placeholders
 /// does not match the number of values given.
 pub fn try_sprintf(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
