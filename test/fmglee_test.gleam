@@ -81,7 +81,21 @@ pub fn try_fmt_float_decimal_test() {
   |> should.equal(Ok("3.14"))
 }
 
+pub fn try_fmt_float_decimal_negative_test() {
+  fmglee.new("%.2f")
+  |> fmglee.f(-3.1415926)
+  |> fmglee.try_build
+  |> should.equal(Ok("-3.14"))
+}
+
 pub fn try_fmt_float_decimal_less_test() {
+  fmglee.new("%.2f")
+  |> fmglee.f(-1.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("-1.00"))
+}
+
+pub fn try_fmt_float_decimal_less_negative_test() {
   fmglee.new("%.2f")
   |> fmglee.f(1.0)
   |> fmglee.try_build
@@ -95,6 +109,13 @@ pub fn try_fmt_float_delimiter_test() {
   |> should.equal(Ok("1,234.0"))
 }
 
+pub fn try_fmt_float_delimiter_negative_test() {
+  fmglee.new("%,f")
+  |> fmglee.f(-1234.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("-1,234.0"))
+}
+
 pub fn try_fmt_float_delimiter_no_remainder_test() {
   fmglee.new("%,.0f")
   |> fmglee.f(1234.0)
@@ -102,9 +123,65 @@ pub fn try_fmt_float_delimiter_no_remainder_test() {
   |> should.equal(Ok("1,234"))
 }
 
+pub fn try_fmt_float_delimiter_no_remainder_negative_test() {
+  fmglee.new("%,.0f")
+  |> fmglee.f(-1234.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("-1,234"))
+}
+
 pub fn try_fmt_float_round_no_remainder_test() {
   fmglee.new("%.0f")
   |> fmglee.f(1234.1234)
   |> fmglee.try_build
   |> should.equal(Ok("1234"))
+}
+
+pub fn try_fmt_float_round_no_remainder_negative_test() {
+  fmglee.new("%.0f")
+  |> fmglee.f(-1234.1234)
+  |> fmglee.try_build
+  |> should.equal(Ok("-1234"))
+}
+
+pub fn try_fmt_float_really_small_test() {
+  fmglee.new("%.9f")
+  |> fmglee.f(0.000001415926)
+  |> fmglee.try_build
+  |> should.equal(Ok("0.000001415"))
+}
+
+pub fn try_fmt_float_really_small_negative_test() {
+  fmglee.new("%.9f")
+  |> fmglee.f(-0.000001415926)
+  |> fmglee.try_build
+  |> should.equal(Ok("-0.000001415"))
+}
+
+pub fn try_fmt_float_really_large_test() {
+  fmglee.new("%f")
+  |> fmglee.f(140_000_000.2)
+  |> fmglee.try_build
+  |> should.equal(Ok("140000000.2"))
+}
+
+pub fn try_fmt_float_really_large_negative_test() {
+  fmglee.new("%f")
+  |> fmglee.f(-140_000_000.2)
+  |> fmglee.try_build
+  |> should.equal(Ok("-140000000.2"))
+}
+
+pub fn try_fmt_float_trailing_test() {
+  fmglee.new("%f")
+  |> fmglee.f(140_000_000.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("140000000.0"))
+}
+
+pub fn try_fmt_float_trailing_negative_test() {
+  fmglee.new("%f")
+  |> fmglee.f(-140_000_000.0)
+  |> fmglee.try_build
+  |> should.equal(Ok("-140000000.0"))
 }

@@ -150,7 +150,7 @@ pub fn sprintf(s: String, with v: List(Fmt)) -> String {
 /// the placeholder and the value, or if the number of placeholders
 /// does not match the number of values given.
 pub fn try_sprintf(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
-  let assert Ok(re) = regex.from_string("(\\%d|\\%s|\\%[\\W]?f|%[\\W]?\\.\\df)")
+  let assert Ok(re) = regex.from_string("(%d|%s|%[\\W]?f|%[\\W]?\\.\\df)")
   let matches =
     regex.scan(re, s)
     |> list.map(fn(m) { m.content })
@@ -208,13 +208,13 @@ fn process_float_fmt(
     }
     ["%", ".", n, "f"] -> {
       use val <- result.try(
-        float.to_string(value)
+        float_to_string(value)
         |> round_float(n),
       )
       process_fmt(placeholder, val, str, values, matches)
     }
     ["%", "f"] ->
-      process_fmt("%f", float.to_string(value), str, values, matches)
+      process_fmt("%f", float_to_string(value), str, values, matches)
     _ -> Error(InvalidFloatFormatSpecifier(placeholder))
   }
 }
@@ -263,7 +263,7 @@ fn format_delimited_float(
   value: Float,
   delimiter: String,
 ) -> Result(String, FmtError) {
-  let val = float.to_string(value)
+  let val = float_to_string(value)
   case string.split(val, on: ".") {
     [num, remainder] -> {
       let intersparced =
@@ -286,7 +286,44 @@ fn format_delimited_float(
         |> string.join("")
       Ok(s <> "." <> remainder)
     }
-    _ -> Error(InvalidFloat(float.to_string(value)))
+    _ -> Error(InvalidFloat(float_to_string(value)))
+  }
+}
+
+fn float_to_string(value: Float) -> String {
+  case value {
+    // On erlang, small floats are converted to a string with scientific 
+    // notation. These first two cases handle small floats. It assumes the 
+    // largest float decimal point specifier is %.9f (what it currently is at 
+    // the time of writing). If allowing for a higher number of decimal 
+    // places is added later, this will need to be updated.
+    value if value <. 0.001 && value >=. 0.0 ->
+      "0."
+      <> {
+        float.truncate(value *. 1_000_000_000.0)
+        |> int.to_string
+        |> string.pad_left(9, "0")
+      }
+    value if value >. -0.001 && value <. 0.0 ->
+      "-0."
+      <> {
+        float.truncate(value *. -1_000_000_000.0)
+        |> int.to_string
+        |> string.pad_left(9, "0")
+      }
+
+    // On erlang, large floats with trailing zeros are converted to a string
+    // with scientific notation. This handles large or negative floats
+    // with trailing zeros.
+    value if value >. 1000.0 || value <. -1000.0 -> {
+      let trunc = float.truncate(value)
+      case value == trunc |> int.to_float {
+        True -> trunc |> int.to_string <> ".0"
+        False -> float.to_string(value)
+      }
+    }
+
+    value -> float.to_string(value)
   }
 }
 
