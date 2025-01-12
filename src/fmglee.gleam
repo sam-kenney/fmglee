@@ -32,7 +32,7 @@ import gleam/float
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/regex
+import gleam/regexp
 import gleam/result
 import gleam/string
 
@@ -104,7 +104,7 @@ pub fn printlnf(formatter: Formatter) {
 /// will be built using `sprintf` which will panic if the
 /// formatter is invalid.
 pub fn writef(formatter: Formatter, using writer: Writer(a)) -> a {
-  write(formatter.s, formatter.v, writer)
+  write(formatter.s, list.reverse(formatter.v), writer)
 }
 
 /// Writer a `Formatter` to the provided writer. The `Formatter`
@@ -114,7 +114,7 @@ pub fn try_writef(
   formatter: Formatter,
   using writer: Writer(a),
 ) -> Result(a, FmtError) {
-  use s <- result.try(try_sprintf(formatter.s, formatter.v))
+  use s <- result.try(try_sprintf(formatter.s, list.reverse(formatter.v)))
   Ok(writer(s))
 }
 
@@ -150,9 +150,9 @@ pub fn sprintf(s: String, with v: List(Fmt)) -> String {
 /// the placeholder and the value, or if the number of placeholders
 /// does not match the number of values given.
 pub fn try_sprintf(s: String, with v: List(Fmt)) -> Result(String, FmtError) {
-  let assert Ok(re) = regex.from_string("(%d|%s|%[\\W]?f|%[\\W]?\\.\\df)")
+  let assert Ok(re) = regexp.from_string("(%d|%s|%[\\W]?f|%[\\W]?\\.\\df)")
   let matches =
-    regex.scan(re, s)
+    regexp.scan(re, s)
     |> list.map(fn(m) { m.content })
 
   let num_matches = list.length(matches)
@@ -302,14 +302,14 @@ fn float_to_string(value: Float) -> String {
       <> {
         float.truncate(value *. 1_000_000_000.0)
         |> int.to_string
-        |> string.pad_left(9, "0")
+        |> string.pad_start(9, "0")
       }
     value if value >. -0.001 && value <. 0.0 ->
       "-0."
       <> {
         float.truncate(value *. -1_000_000_000.0)
         |> int.to_string
-        |> string.pad_left(9, "0")
+        |> string.pad_start(9, "0")
       }
 
     // On erlang, large floats with trailing zeros are converted to a string

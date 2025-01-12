@@ -15,6 +15,15 @@ pub fn build_test() {
   |> should.equal("Hello, world. 42 is an integer, 6.9 is a float.")
 }
 
+pub fn try_printlnf_test() {
+  fmglee.new("Hello, %s. %d is an integer, %f is a float.")
+  |> fmglee.s("world")
+  |> fmglee.d(42)
+  |> fmglee.f(6.9)
+  |> fmglee.try_writef(fn(_) { Nil })
+  |> should.be_ok
+}
+
 pub fn try_build_too_many_values_test() {
   fmglee.new("")
   |> fmglee.s("")
